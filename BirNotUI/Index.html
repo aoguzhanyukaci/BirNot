@@ -3,21 +3,58 @@
 <head>
     <meta charset="utf-8" />
     <title>BirNot</title>
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="Content/site.css" rel="stylesheet" />
 </head>
 <body>
+    <div id="uyelikSayfa">
+        <form class="form-signin giris">
+            <img class="mb-4" src="Images/logo.png" alt="" width="72" height="72">
+            <div class="mb-3">
+                <div class="btn-group" id="girisKayit">
+                    <a href="#" class="btn btn-sm btn-outline-secondary active" data-tur="giris">Giriş Yap</a>
+                    <a href="#" class="btn btn-sm btn-outline-secondary" data-tur="kayit">Kayıt Ol</a>
+                </div>
+            </div>
+            <label for="inputEmail" class="sr-only">Email address</label>
+            <input type="email" id="inputEmail" class="form-control" placeholder="Mail Adres" required autofocus>
+            <label for="inputPassword" class="sr-only">Parola</label>
+            <input type="password" id="inputPassword" class="form-control" placeholder="Parola" required>
+            <label for="inputConfirmPassword" class="sr-only">Parolayı Doğrula</label>
+            <input type="password" id="inputConfirmPassword" class="form-control" placeholder="Parolayı Doğrula" required>
+            <div class="checkbox mb-3 remember-me-div">
+                <label>
+                    <input type="checkbox" value="remember-me"> Beni hatırla
+                </label>
+            </div>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Giriş Yap</button>
+            <p class="mt-5 mb-3 text-muted">&copy; 2021 - Ali Rıza Oğuzhan Yukacı</p>
+        </form>
+    </div>
+    <div id="notlarSayfa" style="display: none"></div>
 
     <script src="Scripts/jquery-3.6.0.min.js"></script>
-
+    <script src="Scripts/bootstrap.bundle.min.js"></script>
     <script>
-        $.ajax({
-            type: "get",
-            url: "https://localhost:44341/api/values",
-            headers: {
-                Authorization: "Bearer -U4uy8T_1CVETe7nnphBWWeZC5Fuc-cqxHNCIgW611AFiHjhONLHHOwEJmheFGuoyxPirAETGtbKaBmHybIoRLKu72-tvz8CMOVMIc33PlizhO4EDBI2b6QgdZWidGD4WOaEmJIL3ERNg2E0yalnBsMUTlJX18i1RVex3i6YasRRSGRWI0O0HhNcYhIeaCY8C4nizbXD2pvAgKyWgjV9odDci7bkel027hVQoFlRbVdxw84DlCS4h-TdoczJHOU9VjJqXNsMjeEkwbcifwQHB3m50OWsOITSEVPhFONb5zafdWYvprDzvgJ91zEhpsYkXLl7DU8qJC8TT3iEVLgWawlKF4AtQPYwuAzG7xOGuDkiGGZDLVZr9JmHxapVBNyM4F65SY_RRL-AV8npGLAvHxM7CvrnaQMenc4FUMhWbvgXPoQUwtGVLo8mObV8kVLLJPAWFFEpf6rRuYRNPEBa955qMO6tR9ukM_C0qPftlOruyaFBHnHUC75IDNmQqGtX"
-            },
-            success: function (data) {
-                alert(data[0] + " ve " + data[1]);
+        $("#girisKayit > a").click(function (event) {
+            event.preventDefault();
+            var a = this;
+            $(a).addClass("active");
+            $(a).siblings("a").removeClass("active");
+            var tur = $(this).data("tur");
+            $('.form-signin button[type="submit"]').text(
+                tur == "giris" ? "Giriş Yap" : "Kayıt Ol"
+            );
+
+            switch (tur) {
+                case "giris":
+                    $(".form-signin").removeClass("kayit").addClass("giris");
+                    break;
+                case "kayit":
+                    $(".form-signin").removeClass("giris").addClass("kayit");
+                    break;
             }
+
         });
     </script>
 </body>
