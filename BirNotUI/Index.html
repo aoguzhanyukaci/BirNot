@@ -3,31 +3,37 @@
 <head>
     <meta charset="utf-8" />
     <title>BirNot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link rel="icon" type="image/png" href="Images/logo.png" />
     <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="Content/toastr.min.css" rel="stylesheet" />
     <link href="Content/site.css" rel="stylesheet" />
 </head>
 <body>
     <div id="uyelikSayfa">
-        <form class="form-signin giris">
-            <img class="mb-4" src="Images/logo.png" alt="" width="72" height="72">
+        <form class="form-signin giris" id="frmGirisKayit">
+            <img class="mb-4" src="Images/logo.png" alt="" width="100" height="100">
             <div class="mb-3">
                 <div class="btn-group" id="girisKayit">
-                    <a href="#" class="btn btn-sm btn-outline-secondary active" data-tur="giris">Giriş Yap</a>
-                    <a href="#" class="btn btn-sm btn-outline-secondary" data-tur="kayit">Kayıt Ol</a>
+                    <a href="#" class="btn btn-sm btn-outline-secondary active" data-tur="giris" id="switchGiris">Giriş Yap</a>
+                    <a href="#" class="btn btn-sm btn-outline-secondary" data-tur="kayit" id="switchKayit">Kayıt Ol</a>
                 </div>
             </div>
             <label for="inputEmail" class="sr-only">Email address</label>
-            <input type="email" id="inputEmail" class="form-control" placeholder="Mail Adres" required autofocus>
+            <input type="email" id="inputEmail" name="Email" class="form-control" placeholder="Mail Adres" required autofocus>
             <label for="inputPassword" class="sr-only">Parola</label>
-            <input type="password" id="inputPassword" class="form-control" placeholder="Parola" required>
+            <input type="password" id="inputPassword" name="Password" class="form-control" placeholder="Parola" required>
             <label for="inputConfirmPassword" class="sr-only">Parolayı Doğrula</label>
-            <input type="password" id="inputConfirmPassword" class="form-control" placeholder="Parolayı Doğrula" required>
+            <input type="password" id="inputConfirmPassword" name="ConfirmPassword" class="form-control" placeholder="Parolayı Doğrula" required disabled>
             <div class="checkbox mb-3 remember-me-div">
                 <label>
-                    <input type="checkbox" value="remember-me"> Beni hatırla
+                    <input type="checkbox" id="inputRememberMe"> Beni hatırla
                 </label>
             </div>
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Giriş Yap</button>
+            <button class="btn btn-lg  btn-block" style="background-color:#253aae;
+        color: white;" type="submit">
+                Giriş Yap
+            </button>
             <p class="mt-5 mb-3 text-muted">&copy; 2021 - Ali Rıza Oğuzhan Yukacı</p>
         </form>
     </div>
@@ -35,7 +41,11 @@
 
     <script src="Scripts/jquery-3.6.0.min.js"></script>
     <script src="Scripts/bootstrap.bundle.min.js"></script>
+    <script src="Scripts/toastr.min.js"></script>
     <script>
+
+        var apiUrl = "https://localhost:44341/";
+
         $("#girisKayit > a").click(function (event) {
             event.preventDefault();
             var a = this;
@@ -49,13 +59,74 @@
             switch (tur) {
                 case "giris":
                     $(".form-signin").removeClass("kayit").addClass("giris");
+                    $("#inputConfirmPassword").prop("disabled", true);
                     break;
                 case "kayit":
                     $(".form-signin").removeClass("giris").addClass("kayit");
+                    $("#inputConfirmPassword").prop("disabled", false);
                     break;
             }
 
+            $("#inputEmail").focus();
+            $("#frmGirisKayit")[0].reset();
         });
+
+        $("#frmGirisKayit").submit(function (event) {
+            event.preventDefault();
+            var frm = this;
+
+            // Kayıt Modu
+            if ($(frm).hasClass("kayit")) {
+                $.ajax({
+                    type: "post",
+                    url: apiUrl + "api/Account/Register",
+                    data: $(frm).serialize(),
+                    success: function (data) {
+                        frm.reset();
+                        $("#switchGiris").trigger("click");
+                        toastr.success("Hesabınız oluşturuldu. Şimdi giriş yapabilirsiniz.", "Kayıt Başarılı");
+                    },
+                    error: function (xhr, status, error) {
+                        showErrors(xhr.responseJSON);
+                    }
+                });
+            }
+            // Giriş Modu
+            else {
+                var email = $("#inputEmail").val();
+                var password = $("#inputPassword").val();
+                $.ajax({
+                    type: "post",
+                    url: apiUrl + "Token",
+                    data: { grant_type: "password", username: email, password: password },
+                    success: function (data) {
+                        var rememberMe = $("#inputRememberMe").prop("checked");
+                        var storage = rememberMe ? localStorage : sessionStorage;
+                    },
+                    error: function (xhr, status, error) {
+                        showErrors(xhr.responseJSON);
+                    }
+
+                });
+            }
+        });
+
+        function showErrors(data) {
+            if (data.ModelState) {
+                var ms = data.ModelState;
+
+                for (var key in ms) {
+                    var errors = ms[key];
+
+                    for (const error of errors) {
+                        toastr.error(error);
+                    }
+                }
+            }
+            else if (data.error_description) {
+                toastr.error(data.error_description);
+            }
+        }
     </script>
 </body>
 </html>
